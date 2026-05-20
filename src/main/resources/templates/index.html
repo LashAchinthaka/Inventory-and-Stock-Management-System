@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Inventory System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+
+        body {
+            background: #f4f7fc;
+        }
+
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-weight: bold;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+    <div class="card p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <h1>Inventory Management</h1>
+
+            <a class="btn btn-primary btn-lg" href="/add">
+                Add Item
+            </a>
+
+        </div>
+
+        <table class="table table-hover table-bordered">
+
+            <thead class="table-dark">
+
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th width="200">Actions</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr th:each="item : ${items}">
+
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.quantity}"></td>
+                <td th:text="'LKR ' + ${#numbers.formatDecimal(item.price, 1, 2)}"></td>
+
+                <td>
+
+                    <a class="btn btn-warning btn-sm"
+                       th:href="@{/edit/{id}(id=${item.id})}">
+                        Edit
+                    </a>
+
+                    <button class="btn btn-danger btn-sm"
+                            th:attr="onclick=|confirmDelete('${item.id}')|">
+                        Delete
+                    </button>
+
+                </td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script>
+
+    function confirmDelete(id) {
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This item will be deleted!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+                window.location.href = '/delete/' + id;
+            }
+        });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.get('success') === 'added') {
+        Swal.fire('Success!', 'Item Added Successfully!', 'success');
+    }
+
+    if (urlParams.get('success') === 'updated') {
+        Swal.fire('Updated!', 'Item Updated Successfully!', 'success');
+    }
+
+    if (urlParams.get('success') === 'deleted') {
+        Swal.fire('Deleted!', 'Item Deleted Successfully!', 'success');
+    }
+
+</script>
+
+</body>
+</html>
