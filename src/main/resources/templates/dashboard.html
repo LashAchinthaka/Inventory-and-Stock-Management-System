@@ -1,92 +1,164 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <title>Inventory Dashboard</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-
         body {
+            background: #f4f6fb;
             margin: 0;
-            background: #f4f7fc;
         }
 
+        /* SIDEBAR */
         .sidebar {
+            width: 260px;
             height: 100vh;
-            width: 250px;
             position: fixed;
-            background: #1e293b;
+            background: #111827;
             padding-top: 20px;
+        }
+
+        .sidebar h3 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
         }
 
         .sidebar a {
             display: block;
-            color: white;
+            color: #cbd5e1;
             padding: 12px 20px;
             text-decoration: none;
             transition: 0.3s;
         }
 
         .sidebar a:hover {
-            background: #334155;
+            background: #1f2937;
+            color: white;
+            padding-left: 25px;
         }
 
+        /* MAIN */
         .main {
-            margin-left: 250px;
+            margin-left: 260px;
             padding: 20px;
         }
 
-        .card {
+        /* CARDS */
+        .card-box {
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
         }
 
-        .topbar {
+        .card-box:hover {
+            transform: translateY(-5px);
+        }
+
+        /* TABLE */
+        .table-container {
             background: white;
-            padding: 15px;
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        /* TOP BAR */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
 
-    </style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-
-    <h4 class="text-white text-center mb-4">Inventory</h4>
+    <h3>📦 Inventory</h3>
 
     <a href="/dashboard">🏠 Dashboard</a>
     <a href="/add">➕ Add Item</a>
-    <a href="/report">📄 Download PDF Report</a>
+    <a href="/report">📄 Download Report</a>
     <a href="/profile">👤 Profile</a>
-    <a href="/logout">🚪 Logout</a>
-
+    <a href="/logout" onclick="return confirm('Are you sure you want to logout?')">🚪 Logout</a>
 </div>
 
-<!-- MAIN CONTENT -->
-<div class="main">
+<!-- MAIN -->
+<div class="main fade-in">
 
-    <div class="topbar d-flex justify-content-between align-items-center">
+    <!-- SUCCESS MESSAGE -->
+    <div class="alert alert-success" th:if="${param.success}">
+        Operation completed successfully!
+    </div>
 
-        <h3>Dashboard</h3>
+    <div class="alert alert-danger" th:if="${param.deleted}">
+        Item deleted successfully!
+    </div>
+
+    <div class="alert alert-primary" th:if="${param.updated}">
+        Item updated successfully!
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <h2>Dashboard</h2>
 
         <form action="/dashboard" class="d-flex" method="get">
             <input class="form-control me-2" name="search" placeholder="Search item...">
-            <button class="btn btn-primary">Search</button>
+            <button class="btn btn-dark">Search</button>
         </form>
+    </div>
+
+    <!-- STATS -->
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card card-box p-3 text-center">
+                <h5>Total Items</h5>
+                <h2 th:text="${items.size()}"></h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-box p-3 text-center">
+                <h5>Status</h5>
+                <h4 class="text-success">Active</h4>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-box p-3 text-center">
+                <h5>Report</h5>
+                <a class="btn btn-primary btn-sm" href="/report">Download PDF</a>
+            </div>
+        </div>
 
     </div>
 
-    <div class="card p-3">
+    <!-- TABLE -->
+    <div class="table-container">
 
-        <table class="table table-hover">
-
+        <table class="table table-hover align-middle">
             <thead class="table-dark">
             <tr>
                 <th>ID</th>
@@ -98,7 +170,6 @@
             </thead>
 
             <tbody>
-
             <tr th:each="i : ${items}">
                 <td th:text="${i.id}"></td>
                 <td th:text="${i.name}"></td>
@@ -106,13 +177,23 @@
                 <td th:text="${i.price}"></td>
 
                 <td>
-                    <a class="btn btn-warning btn-sm" th:href="@{/edit/{id}(id=${i.id})}">Edit</a>
-                    <a class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')"
-                       th:href="@{/delete/{id}(id=${i.id})}">Delete</a>
+
+                    <a class="btn btn-warning btn-sm"
+                       th:href="@{/edit/{id}(id=${i.id})}">
+                        Edit
+                    </a>
+
+                    <!-- DELETE BUTTON (OPENS MODAL) -->
+                    <button class="btn btn-danger btn-sm"
+                            data-bs-target="#deleteModal"
+                            data-bs-toggle="modal"
+                            onclick="setDeleteLink(this)"
+                            th:attr="data-id=${i.id}">
+                        Delete
+                    </button>
+
                 </td>
-
             </tr>
-
             </tbody>
 
         </table>
@@ -121,30 +202,39 @@
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- DELETE MODAL -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
 
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <p class="fs-5">⚠ Are you sure you want to delete this item?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+            </div>
+
+            <div class="modal-footer justify-content-center">
+                <a class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</a>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT -->
 <script>
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const success = urlParams.get('success');
-
-    if (success === 'added') {
-        Swal.fire('Success!', 'Item Added Successfully!', 'success');
+    function setDeleteLink(button) {
+        let id = button.getAttribute("data-id");
+        document.getElementById("confirmDeleteBtn").href = "/delete/" + id;
     }
-
-    if (success === 'updated') {
-        Swal.fire('Updated!', 'Item Updated Successfully!', 'success');
-    }
-
-    if (success === 'deleted') {
-        Swal.fire('Deleted!', 'Item Deleted Successfully!', 'success');
-    }
-
-    if (success === 'report') {
-        Swal.fire('Done!', 'Report Generated Successfully!', 'success');
-    }
-
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
