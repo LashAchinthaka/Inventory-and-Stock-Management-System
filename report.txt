@@ -1,0 +1,5 @@
+INVENTORY REPORT
+
+00034 | Gotukola | 56 | 15.0
+52589345 | potato | 34 | 45.0
+52589349 | tomato | 67 | 300.0

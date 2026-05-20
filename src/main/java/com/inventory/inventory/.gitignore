@@ -1,0 +1,11 @@
+# Generated files
+*.txt
+*.pdf
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# Maven
+target/
