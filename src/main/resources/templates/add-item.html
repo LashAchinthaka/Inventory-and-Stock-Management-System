@@ -33,42 +33,64 @@
 
         <form action="/add" method="post">
 
+            <!-- ITEM ID -->
             <div class="mb-3">
                 <input class="form-control"
                        name="id"
                        placeholder="Item ID"
                        required
-                       type="text">
+                       pattern="^[A-Za-z0-9_-]{3,10}$"
+                       title="3–10 characters, letters/numbers only">
             </div>
 
+            <!-- NAME -->
             <div class="mb-3">
                 <input class="form-control"
                        name="name"
                        placeholder="Item Name"
                        required
-                       type="text">
+                       maxlength="50"
+                       minlength="3"
+                       pattern="^[A-Za-z0-9 ]+$"
+                       title="Only letters, numbers and spaces allowed">
             </div>
 
+            <!-- QUANTITY -->
             <div class="mb-3">
                 <input class="form-control"
                        name="quantity"
                        placeholder="Quantity"
                        required
+                       max="10000"
+                       min="1"
+                       title="Quantity must be between 1 and 10000"
                        type="number">
             </div>
 
+            <!-- PRICE -->
             <div class="mb-3">
                 <input class="form-control"
                        name="price"
                        placeholder="Price"
                        required
+                       max="1000000"
                        step="0.01"
+                       min="0.01"
+                       title="Price must be greater than 0"
                        type="number">
             </div>
 
-            <button class="btn btn-success w-100">
-                Save Item
-            </button>
+            <div class="d-grid gap-2">
+
+                <button class="btn btn-success w-100">
+                    Save Item
+                </button>
+
+                <a class="btn btn-outline-secondary w-100" href="/dashboard">
+                    Back to Dashboard
+                </a>
+
+            </div>
 
         </form>
 

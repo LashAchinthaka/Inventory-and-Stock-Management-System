@@ -2,12 +2,14 @@ package com.inventory.inventory.controller;
 
 import com.inventory.inventory.model.Item;
 import com.inventory.inventory.service.FileService;
+import jakarta.validation.Valid;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -45,7 +47,6 @@ public class ItemController {
         }
 
         model.addAttribute("items", items);
-
         return "dashboard";
     }
 
@@ -56,16 +57,21 @@ public class ItemController {
         return "add-item";
     }
 
-    // ---------------- ADD ITEM ----------------
+    // ---------------- ADD ITEM (ONLY ONE POST MAPPING FIX) ----------------
     @PostMapping("/add")
-    public String addItem(@ModelAttribute Item item) throws IOException {
+    public String addItem(@Valid @ModelAttribute Item item,
+                          BindingResult result) throws IOException {
+
+        if (result.hasErrors()) {
+            return "add-item";
+        }
 
         fileService.saveItem(item);
 
         return "redirect:/dashboard?success=added";
     }
 
-    // ---------------- DELETE ITEM (FIXED) ----------------
+    // ---------------- DELETE ITEM (FIXED TYPE) ----------------
     @GetMapping("/delete/{id}")
     public String deleteItem(@PathVariable String id) throws IOException {
 
@@ -74,9 +80,9 @@ public class ItemController {
         return "redirect:/dashboard?success=deleted";
     }
 
-    // ---------------- EDIT PAGE (FIXED) ----------------
+    // ---------------- EDIT PAGE (FIXED TYPE) ----------------
     @GetMapping("/edit/{id}")
-    public String editPage(@PathVariable String id, Model model) throws IOException {
+    public String edit(@PathVariable String id, Model model) throws IOException {
 
         Item item = fileService.findById(id);
 
@@ -85,7 +91,6 @@ public class ItemController {
         }
 
         model.addAttribute("item", item);
-
         return "edit-item";
     }
 
@@ -104,7 +109,7 @@ public class ItemController {
         return "profile";
     }
 
-    // ---------------- PDF REPORT ----------------
+    // ---------------- REPORT ----------------
     @GetMapping("/report")
     public ResponseEntity<FileSystemResource> downloadReport() throws Exception {
 
